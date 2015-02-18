@@ -29,6 +29,11 @@
                 "type": "font"
             },
             {
+                "file": "images/screenshot.png",
+                "name": "IMAGES_SCREENSHOT_PNG",
+                "type": "png"
+            },
+            {
                 "file": "images/domoticzbw.png",
                 "menuIcon": true,
                 "name": "IMAGES_DOMOTICZBW_PNG",
@@ -44,7 +49,7 @@
     "shortName": "Pebblemoticz",
     "uuid": "0be22fcd-608a-4d2b-9839-899730769898",
     "versionCode": 1,
-    "versionLabel": "1.3",
+    "versionLabel": "1.4",
     "watchapp": {
         "watchface": false
     }

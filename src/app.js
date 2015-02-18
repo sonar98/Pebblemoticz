@@ -12,6 +12,13 @@ var showutilities = Settings.option('showutilities');
 var showtemperature = Settings.option('showtemperature');
 var showweather = Settings.option('showweather');
 
+var menusections = [];
+if(showscenes == '1'){menusections.push("Scenes");}
+if(showswitches == '1'){menusections.push("Switches");}
+if(showutilities == '1'){menusections.push("Utilities");}
+if(showtemperature == '1'){menusections.push("Temperature");}
+if(showweather == '1'){menusections.push("Weather");}
+
 splashScreen.show();
 
 
@@ -147,7 +154,7 @@ var domoticz = {
                   return domoticz._data;
   },
   getDevices : function () {
-    return this._request('/json.htm?type=devices&used=true&order=Name');
+        return this._request('/json.htm?type=devices&used=true&order=Name');
     },
   getScenes : function () {
     return this._request('/json.htm?type=scenes');
@@ -166,6 +173,9 @@ var domoticz = {
   },
   getDevice : function (idx) {
     return this._request('/json.htm?type=devices&rid=' + idx);
+  },
+  getScene : function (idx) {
+    return this._request('/json.htm?type=scenes&rid=' + idx);
   },
   On : function (idx) {
     return this._request('/json.htm?type=command&param=switchlight&idx='+ idx +'&switchcmd=On&level=0');
@@ -202,12 +212,6 @@ Settings.config({
   function(e) {console.log('opening configurable');},
   function(e) {console.log('closed configurable');if (e.failed) {console.log(e.response);}}
                );
-var menusections = [];
-if(showscenes == '1'){menusections.push("Scenes");}
-if(showswitches == '1'){menusections.push("Switches");}
-if(showutilities == '1'){menusections.push("Utilities");}
-if(showtemperature == '1'){menusections.push("Temperature");}
-if(showweather == '1'){menusections.push("Weather");}
 
 var menu = new UI.Menu();
 for (var x = 0; x < menusections.length; x++ ) {
@@ -219,48 +223,87 @@ var switches = domoticz.getSwitches();
 var utilities = domoticz.getUtilities();
 var temperature = domoticz.getTemperature();
 var weather = domoticz.getWeather();
+var q = 0;
 //scenes 
-for(var i=0,m=0; i < scenes.result.length; i++) {
-             if(showfavorites == '1'){  if(scenes.result[i].Favorite == 1){}
-  menu.item(0, m, { title: scenes.result[i].Name, idx: scenes.result[i].idx, type: 'Scene', status: scenes.result[i].Status });
-  m++;
-if(showfavorites == '1'){ } }
-}
+if(showscenes == '1')
+  {
+    if(q=='0') { q = '0';} 
+    for(var i=0,m=0; i < scenes.result.length; i++) {
+      if(showfavorites == '1'){  if(scenes.result[i].Favorite == 1) {
+      menu.item(q, m, { title: scenes.result[i].Name, idx: scenes.result[i].idx, type: 'Scene' });
+      m++;
+      }} else {
+        menu.item(q, m, { title: scenes.result[i].Name, idx: scenes.result[i].idx, type: 'Scene' });
+        m++; }} q++;
+  }
 //switches
-for(var i=0,m=0; i<switches.result.length; i++) {
-  if(switches.result[i].Favorite == 1){
-  menu.item(1, m, { title: switches.result[i].Name, idx: switches.result[i].idx, type: 'Switch'});
-  m++;
+if(showswitches == '1')
+  {
+   if(q=='0') { q = '0';}
+   for(var i=0,m=0; i<switches.result.length; i++) {
+     if(showfavorites == '1'){ if(switches.result[i].Favorite == 1) {
+      menu.item(q, m, { title: switches.result[i].Name, idx: switches.result[i].idx, type: 'Switch'});
+      m++;
+     }} else {
+      menu.item(q, m, { title: switches.result[i].Name, idx: switches.result[i].idx, type: 'Switch'});
+      m++;
+    } } 
+     q++;
   }
-}
 //utilities
-for(var i=0,m=0; i<utilities.result.length; i++) {
-  if(utilities.result[i].Favorite == 1){
-        menu.item(2, m, { title: utilities.result[i].Name, idx: utilities.result[i].idx, type: 'Utility', status: utilities.result[i].CounterToday });
-  m++;
+if(showutilities == '1')
+  {
+   if(q=='0') { q = '0';}
+  for(var i=0,m=0; i<utilities.result.length; i++) {
+    if(showfavorites == '1'){ if(utilities.result[i].Favorite == 1){
+      menu.item(q, m, { title: utilities.result[i].Name, idx: utilities.result[i].idx, type: 'Utility', status: utilities.result[i].CounterToday });
+      m++;
+    }} else {
+      menu.item(q, m, { title: utilities.result[i].Name, idx: utilities.result[i].idx, type: 'Utility', status: utilities.result[i].CounterToday });
+      m++;
+    }}
+    q++;
   }
-}
-
 //Temperature
-for(var i=0,m=0; i<temperature.result.length; i++) {
-  if(temperature.result[i].Favorite == 1){
-  menu.item(3, m, { title: temperature.result[i].Name, idx :temperature.result[i].idx, type: 'Temp', status: temperature.result[i].Temp});
-  m++;
+if(showtemperature == '1')
+  {
+     if(q=='0') { q = '0';}
+     for(var i=0,m=0; i<temperature.result.length; i++) {
+       if(showfavorites == '1'){ if(temperature.result[i].Favorite == 1){
+         menu.item(q, m, { title: temperature.result[i].Name, idx :temperature.result[i].idx, type: 'Temp', status: temperature.result[i].Temp});
+         m++;
+    }} else {
+        menu.item(q, m, { title: utilities.result[i].Name, idx: utilities.result[i].idx, type: 'Utility', status: utilities.result[i].CounterToday });
+        m++;
+    }}
+    q++;
   }
-}
-
 //weather
-for(var i=0,m=0; i<weather.result.length; i++) {
-  if(weather.result[i].Favorite == 1){
-  menu.item(4, m, { title: weather.result[i].Name, idx: weather.result[i].idx, type: 'Weather', status: weather.result[i].Data});
-  m++;
+if(showweather == '1')
+  {
+     if(q=='0') { q = '0';}
+    for(var i=0,m=0; i<weather.result.length; i++) {
+    if(showfavorites == '1'){ if(weather.result[i].Favorite == 1){
+      menu.item(q, m, { title: weather.result[i].Name, idx: weather.result[i].idx, type: 'Weather', status: weather.result[i].Data});
+      m++;
+    }} else {
+      menu.item(q, m, { title: weather.result[i].Name, idx: weather.result[i].idx, type: 'Weather', status: weather.result[i].Data});
+      m++;
+    }}
+    q++;
   }
-}
 
 menu.on('select', function(e) {
-var device = domoticz.getDevice(e.item.idx);
-var idx = e.item.idx;
-
+  var device = '';
+  var idx = '';
+  if(e.item.Type =="Group") {
+    device = domoticz.getScene(e.item.idx);
+    idx = e.item.idx;
+} else {
+  
+ device = domoticz.getDevice(e.item.idx);
+ idx = e.item.idx;
+}
 menu.on('longSelect', function(e) {
   device = domoticz.getDevice(e.item.idx);
   idx = e.item.idx;
@@ -278,25 +321,32 @@ if(device.result[0].Type == "P1 Smart Meter")
   bodyvalue =  'Today:\n' + device.result[0].CounterToday + Usage +'\nTotal:\n' + device.result[0].Counter + Unit;
 } else if(device.result[0].Type == "Temp + Humidity + Baro")
   {
-  bodyvalue = device.result[0].Data;  
+    var data = device.result[0].Data.split(", ");
+    bodyvalue = 'Temp:\n' + data[0] + '\nHumidity\n' + data[1] + '\nBaro:\n' + data[2];  
   }
   else if(device.result[0].Type == "Wind")
   {
-  bodyvalue = device.result[0].Data;    
+    bodyvalue = 'Direction:\n' + device.result[0].DirectionStr + '\nSpeed:\n' + device.result[0].Speed + device.WindSign + '\nGust:\n' + device.result[0].Gust + device.WindSign;
   }
   else if(device.result[0].Type == "UV")
   {
-  bodyvalue = device.result[0].Data;   
-  } else if(device.result[0].Type == "Rain")
+    bodyvalue = 'UV:\n' + device.result[0].Data;   
+  } 
+  else if(device.result[0].Type == "Rain")
   {
-  bodyvalue = device.result[0].Data;
-  } else if(device.result[0].Type == "General")
+    bodyvalue = 'Rain:\n' + device.result[0].Rain + ' mm\nRate:\n' + device.result[0].RainRate + ' mm';
+  } 
+  else if(device.result[0].Type == "General")
   {
-  bodyvalue = device.result[0].Data;
-  } else if(device.result[0].Type == "Temp")
+    var visibility = '';
+    if(device.result[0].SubType == "Visibility"){ visibility = 'Visibility:\n'; } else { visibility = '' ;}
+  bodyvalue = visibility + device.result[0].Data;
+  } 
+  else if(device.result[0].Type == "Temp")
   {
-  bodyvalue = device.result[0].Data;
-  } else {
+    bodyvalue = 'Temp:\n' + device.result[0].Data;
+  } 
+  else {
   bodyvalue = device.result[0].Status;
 }
 var card = new UI.Card({
