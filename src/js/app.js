@@ -10,7 +10,6 @@ ajax2(
     type: 'text'
   },
   function(data2) {
-    console.log('Status local is: ' + data2);
     if (data2 == '0') {domoticzurl = 'https://my.domoticz.com/my/' + backupdomoticzurl;}
 
   },
@@ -160,7 +159,6 @@ var domoticz = {
                   },
                       function(data) {
                         domoticz._data = data;
-                        console.log(JSON.stringify(data));
                         
 
                       },
@@ -327,7 +325,6 @@ if(showweather == '1')
 menu.on('select', function(e) {
   var device = '';
   var idx = '';
-  console.log('Type device: ' + e.item.type);
   if(e.item.type =="Group") {
     device = domoticz.getScene(e.item.idx);
     idx = e.item.idx;
@@ -391,6 +388,11 @@ if(device.result[0].Type == "P1 Smart Meter")
   {
     bodyvalue = 'Temp:\n' + device.result[0].Data;
   } 
+  else if(device.result[0].HardwareName == "Watermeter")
+  {
+    bodyvalue =  'Today:\n' + device.result[0].CounterToday + '\nTotal:\n' + device.result[0].Counter;
+  } 
+ 
   else {
   bodyvalue = device.result[0].Status;
 }
