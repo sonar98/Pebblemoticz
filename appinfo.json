@@ -11,17 +11,17 @@
             {
                 "file": "images/menu_icon.png",
                 "name": "IMAGE_MENU_ICON",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/logo_splash.png",
                 "name": "IMAGE_LOGO_SPLASH",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/tile_splash.png",
                 "name": "IMAGE_TILE_SPLASH",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "fonts/UbuntuMono-Regular.ttf",
@@ -29,28 +29,44 @@
                 "type": "font"
             },
             {
+                "file": "images/power_Off.png",
+                "name": "IMAGES_POWER_OFF_PNG",
+                "type": "png"
+            },
+            {
+                "file": "images/power_On.png",
+                "name": "IMAGES_POWER_ON_PNG",
+                "type": "png"
+            },
+            {
                 "file": "images/screenshot.png",
                 "name": "IMAGES_SCREENSHOT_PNG",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/domoticzbw.png",
                 "menuIcon": true,
                 "name": "IMAGES_DOMOTICZBW_PNG",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/domoticzbw144x144.png",
                 "name": "IMAGES_DOMOTICZBW144X144_PNG",
-                "type": "png"
+                "type": "bitmap"
             }
         ]
     },
+    "sdkVersion": "3",
     "shortName": "Pebblemoticz",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
     "uuid": "0be22fcd-608a-4d2b-9839-899730769898",
     "versionCode": 1,
-    "versionLabel": "1.4",
+    "versionLabel": "1.5",
     "watchapp": {
+        "hiddenApp": false,
         "watchface": false
     }
 }

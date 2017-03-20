@@ -1,8 +1,27 @@
 var Settings = require('settings');
+var ajax2 = require('ajax');
+var domoticzurl = Settings.option('domoticzurl');
+var backupdomoticzurl = Settings.option('backupdomoticzurl');
+var checklocalurl = "http://www.netraam.org/pebble/";
+
+ajax2(
+  {
+    url: checklocalurl,
+    type: 'text'
+  },
+  function(data2) {
+    console.log('Status local is: ' + data2);
+    if (data2 == '0') {domoticzurl = 'https://my.domoticz.com/my/' + backupdomoticzurl;}
+
+  },
+   function(error) {
+    console.log('The ajax request failed: ' + error);
+   }
+ );
+
 var ajax = require('ajax');
 var UI = require('ui');
 var splashScreen = new UI.Card({ banner: 'images/domoticzbw144x144.png',fullscreen: true });
-var domoticzurl = Settings.option('domoticzurl');
 var username = Settings.option('username');
 var password = Settings.option('password'); 
 var showfavorites = Settings.option('showfavorites');
@@ -20,7 +39,6 @@ if(showtemperature == '1'){menusections.push("Temperature");}
 if(showweather == '1'){menusections.push("Weather");}
 
 splashScreen.show();
-
 
 var Base64 = {
     // private property
@@ -200,15 +218,28 @@ var domoticz = {
     device = this.getDevice(idx);
     return device.result[0].Status;
   },
+  toggleScene : function (idx){
+    var device = this.getScene(idx);
+        if(device.result[0].Status == "Off"){this.sceneOn(idx);}
+    else {this.sceneOff(idx);}
+    device = this.getDevice(idx);
+    return device.result[0].Status;
+  },
   toggleDevice2 : function (idx){
     var device = this.getDevice(idx);
-        if(device.result[0].Status == "Off"){this.On(idx);}
-    else {this.Off(idx);}
-    },
+        if(device.result[0].Status == "Off"){
+          this.On(idx);
+       
+          }
+    else {
+        this.Off(idx);
+        
+         }
+  },
 };
 
 Settings.config({
-  url: 'https://www.vanderrijt.nl/pebble/config.html?settings=' + encodeURIComponent(JSON.stringify(Settings.option())) },
+  url: 'https://www.netraam.org/pebble/pebbleconfig.html?settings=' + encodeURIComponent(JSON.stringify(Settings.option())) },
   function(e) {console.log('opening configurable');},
   function(e) {console.log('closed configurable');if (e.failed) {console.log(e.response);}}
                );
@@ -230,10 +261,10 @@ if(showscenes == '1')
     if(q=='0') { q = '0';} 
     for(var i=0,m=0; i < scenes.result.length; i++) {
       if(showfavorites == '1'){  if(scenes.result[i].Favorite == 1) {
-      menu.item(q, m, { title: scenes.result[i].Name, idx: scenes.result[i].idx, type: 'Scene' });
+      menu.item(q, m, { title: scenes.result[i].Name, idx: scenes.result[i].idx, type: scenes.result[i].Type, sid: i });
       m++;
       }} else {
-        menu.item(q, m, { title: scenes.result[i].Name, idx: scenes.result[i].idx, type: 'Scene' });
+        menu.item(q, m, { title: scenes.result[i].Name, idx: scenes.result[i].idx, type: scenes.result[i].Type, sid: i });
         m++; }} q++;
   }
 //switches
@@ -241,8 +272,9 @@ if(showswitches == '1')
   {
    if(q=='0') { q = '0';}
    for(var i=0,m=0; i<switches.result.length; i++) {
+     if(switches.result[0].Status == 'On') {}
      if(showfavorites == '1'){ if(switches.result[i].Favorite == 1) {
-      menu.item(q, m, { title: switches.result[i].Name, idx: switches.result[i].idx, type: 'Switch'});
+      menu.item(q, m, { title: switches.result[i].Name, icon: 'images/power_'+  switches.result[i].Status + '.png', idx: switches.result[i].idx, type: 'Switch'});
       m++;
      }} else {
       menu.item(q, m, { title: switches.result[i].Name, idx: switches.result[i].idx, type: 'Switch'});
@@ -292,24 +324,37 @@ if(showweather == '1')
     }}
     q++;
   }
-
 menu.on('select', function(e) {
   var device = '';
   var idx = '';
-  if(e.item.Type =="Group") {
+  console.log('Type device: ' + e.item.type);
+  if(e.item.type =="Group") {
     device = domoticz.getScene(e.item.idx);
     idx = e.item.idx;
-} else {
+}
+   if(e.item.type =="Switch") {
+    device = domoticz.getDevice(e.item.idx);
+    idx = e.item.idx;
+    var icoon = '';
+  if(device.result[0].Status == 'Off') {icoon = 'On';} else { icoon = 'Off';}
+  menu.item(e.sectionIndex, e.itemIndex, { title: e.item.title, icon: 'images/power_'+  icoon + '.png', idx: idx, type: 'Switch'});
+  domoticz.toggleDevice2(idx);
+}
+  else {
   
  device = domoticz.getDevice(e.item.idx);
  idx = e.item.idx;
 }
-menu.on('longSelect', function(e) {
-  device = domoticz.getDevice(e.item.idx);
-  idx = e.item.idx;
-  domoticz.toggleDevice2(idx);
-});
-
+//menu.on('longSelect', function(e) {
+//  device = domoticz.getDevice(e.item.idx);
+//  idx = e.item.idx;
+//  var icoon = '';
+//  if(device.result[0].Status == 'Off') {icoon = 'On';} else { icoon = 'Off';}
+//  menu.item(e.sectionIndex, e.itemIndex, { title: e.item.title, icon: 'images/power_'+  icoon + '.png', idx: idx, type: 'Switch'});
+//  domoticz.toggleDevice2(idx);
+  
+//});
+  
 var bodyvalue = ''; 
 if(device.result[0].Type == "P1 Smart Meter")
 {
@@ -355,13 +400,15 @@ var card = new UI.Card({
   title: device.result[0].Name,
   body: bodyvalue
                        });
-
   card.on('click', function(e) {
   card.body(domoticz.toggleDevice(idx));
+    
 });
-
+if(e.item.type == 'Switch'){}
+  else {
 card.show();
-});
+  }
+  });
 
 splashScreen.hide();
 menu.show();
